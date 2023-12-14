@@ -1,3 +1,3 @@
-#git reset --hard but not commit
+#########git reset --hard but not commit
 git fsck --full --unreachable --verbose (Để check các file ko được tham chiếu bởi git)
 git cat-file -p 10c5acf92b3c425f89f29c70e2153cf3bb8e75e2 (xem nội dung file với id 10c5acf92b3c425f89f29c70e2153cf3bb8e75e2)
