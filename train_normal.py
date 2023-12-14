@@ -117,6 +117,8 @@ def evaluate(model, dataloader, criterion, device):
     acc = correct / total
 
     return loss, acc
+def save_model(model, filepath):
+    torch.save(model.state_dict(), filepath)
 
 def fit(
         model,
@@ -132,6 +134,7 @@ def fit(
     train_losses = []
     val_losses = []
     running_loss = 0.0
+    best_val_acc = 0.0
     for epoch in range(epochs):
         batch_train_losses = []
         model.train()
@@ -164,6 +167,10 @@ def fit(
                     loss.item(),
                     epoch * len(train_loader) + idx
                 )
+            if (epoch + 1) % 3 == 0:
+                # Save model every 3 epochs
+                save_model(model, f'model_runs/vqa_lstm_cnn_experiment_1_model_epoch_{epoch + 1}.pth')
+
         train_loss = sum(batch_train_losses)/len(batch_train_losses)
         train_losses.append(train_loss)
 
@@ -174,13 +181,17 @@ def fit(
             writer.add_scalar('validation loss', val_loss, epoch)
             writer.add_scalar('validation accuracy', val_acc, epoch)
             print(f'EPOCH {epoch + 1}:\tTrain loss: {train_loss:.4f}\tVal loss: {val_loss:.4f}\tVal Acc: {val_acc}')
+            if val_acc > best_val_acc:
+                # Save the best model based on validation accuracy
+                best_val_acc = val_acc
+                save_model(model, 'model_runs/vqa_lstm_cnn_experiment_1_best_model.pth')
         scheduler.step()
     return train_losses, val_losses
 
 
 ###Train model
 lr = 1e-2
-epochs = 2
+epochs = 1
 weight_decay = 1e-5
 scheduler_step_size = epochs * 0.5
 criterion = nn.CrossEntropyLoss()
@@ -206,3 +217,6 @@ train_losses, val_losses = fit(
     writer,
     epochs
     )
+
+# Save the final model after training completes
+save_model(model, 'model_runs/vqa_lstm_cnn_experiment_1_final_model.pth')
